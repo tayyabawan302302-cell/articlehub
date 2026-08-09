@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  /* Default accent — overridden per-request by Site Settings > Theme Color
+     via an inline <style> tag in the root layout. Light/dark variants are
+     computed with color-mix() so a single admin-set hex drives hover and
+     tint states too, not just the flat color. */
+  --color-accent: #7A2E3A;
+  --color-accent-light: color-mix(in srgb, var(--color-accent) 65%, white);
+  --color-accent-dark: color-mix(in srgb, var(--color-accent) 78%, black);
+}
+
+body {
+  @apply bg-paper text-ink font-body antialiased;
+}
+
+.dark body {
+  @apply bg-paper-dark text-paper;
+}
+
+/* Byline / metadata strip — the page's signature motif: a monospace
+   masthead-style credit line with a vertical rule, used on article cards,
+   the article header, and writer profiles. */
+.byline {
+  @apply font-mono text-xs tracking-tight text-ink-muted flex items-center gap-2;
+}
+.byline > .byline-rule {
+  @apply w-px h-3 bg-line;
+}
+
+.input {
+  @apply border border-line rounded-lg px-3 py-2 bg-white/60 focus:border-denim outline-none transition-colors;
+}
+
+:focus-visible {
+  outline: 2px solid theme("colors.denim.DEFAULT");
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Magazine print styles — used by /magazine/[issueNumber]. Ensures
+   window.print() / "Save as PDF" produces a clean result even when the
+   generated downloadable PDF is unavailable. */
+.print-page-break-after {
+  break-after: page;
+}
+
+@media print {
+  nav,
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  .magazine-print {
+    background: white !important;
+  }
+
+  .magazine-print a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  .magazine-print article,
+  .magazine-print section {
+    break-inside: avoid-page;
+  }
+
+  .magazine-print img {
+    break-inside: avoid;
+  }
+
+  .magazine-print h1,
+  .magazine-print h2,
+  .magazine-print h3 {
+    break-after: avoid;
+  }
+
+  @page {
+    margin: 2cm;
+  }
+}
