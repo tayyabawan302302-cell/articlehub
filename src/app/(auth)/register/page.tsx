@@ -1,4 +1,3 @@
-```tsx
 "use client";
 
 import { useState } from "react";
@@ -12,7 +11,6 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,22 +27,18 @@ export default function RegisterPage() {
     const cleanUsername = username.trim().toLowerCase();
     const cleanEmail = email.trim().toLowerCase();
 
-    // Full name validation
     if (!cleanFullName) {
       setError("Please enter your full name.");
       setLoading(false);
       return;
     }
 
-    // Username length validation
     if (cleanUsername.length < 3 || cleanUsername.length > 30) {
       setError("Username must be between 3 and 30 characters.");
       setLoading(false);
       return;
     }
 
-    // Username character validation
-    // No HTML pattern attribute is used, avoiding the browser /v regex issue.
     if (!/^[a-z0-9_-]+$/.test(cleanUsername)) {
       setError(
         "Username can only contain lowercase letters, numbers, hyphens (-), and underscores (_)."
@@ -53,7 +47,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // Password validation
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
       setLoading(false);
@@ -226,4 +219,3 @@ function Field({
     </label>
   );
 }
-```
