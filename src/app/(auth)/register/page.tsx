@@ -1,3 +1,4 @@
+```tsx
 "use client";
 
 import { useState } from "react";
@@ -11,12 +12,15 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (loading) return;
 
     setLoading(true);
     setError(null);
@@ -25,14 +29,22 @@ export default function RegisterPage() {
     const cleanUsername = username.trim().toLowerCase();
     const cleanEmail = email.trim().toLowerCase();
 
-    // Validate username manually so browsers do not show
-    // an invalid HTML pattern/regex error.
+    // Full name validation
+    if (!cleanFullName) {
+      setError("Please enter your full name.");
+      setLoading(false);
+      return;
+    }
+
+    // Username length validation
     if (cleanUsername.length < 3 || cleanUsername.length > 30) {
       setError("Username must be between 3 and 30 characters.");
       setLoading(false);
       return;
     }
 
+    // Username character validation
+    // No HTML pattern attribute is used, avoiding the browser /v regex issue.
     if (!/^[a-z0-9_-]+$/.test(cleanUsername)) {
       setError(
         "Username can only contain lowercase letters, numbers, hyphens (-), and underscores (_)."
@@ -41,31 +53,44 @@ export default function RegisterPage() {
       return;
     }
 
+    // Password validation
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
       setLoading(false);
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
-      email: cleanEmail,
-      password,
-      options: {
-        data: {
-          full_name: cleanFullName,
-          username: cleanUsername,
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password,
+        options: {
+          data: {
+            full_name: cleanFullName,
+            username: cleanUsername,
+          },
         },
-      },
-    });
+      });
 
-    setLoading(false);
+      if (signUpError) {
+        setError(signUpError.message);
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
-      return;
+      setLoading(false);
+      setSent(true);
+    } catch (err) {
+      console.error("Signup error:", err);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong while creating your account."
+      );
+
+      setLoading(false);
     }
-
-    setSent(true);
   }
 
   if (sent) {
@@ -76,10 +101,18 @@ export default function RegisterPage() {
         </h1>
 
         <p className="text-ink-muted text-sm">
-          We sent a verification link to {email}. Please check your inbox and
-          spam folder. Once your email is verified, an admin will review your
-          writer application before you can publish.
+          We sent a verification link to{" "}
+          <span className="font-medium">{email}</span>. Please check your inbox
+          and spam folder. Once your email is verified, an admin will review
+          your writer application before you can publish.
         </p>
+
+        <Link
+          href="/login"
+          className="inline-block mt-6 text-denim font-medium text-sm"
+        >
+          Go to login
+        </Link>
       </div>
     );
   }
@@ -93,22 +126,28 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Field label="Full name">
           <input
+            type="text"
             required
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             className="input"
+            autoComplete="name"
+            placeholder="Your full name"
           />
         </Field>
 
         <Field label="Username">
           <input
+            type="text"
             required
             minLength={3}
             maxLength={30}
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value.toLowerCase())}
             className="input"
             autoComplete="username"
+            placeholder="your_username"
+            spellCheck={false}
           />
 
           <span className="text-xs text-ink-muted">
@@ -124,6 +163,7 @@ export default function RegisterPage() {
             onChange={(e) => setEmail(e.target.value)}
             className="input"
             autoComplete="email"
+            placeholder="you@example.com"
           />
         </Field>
 
@@ -136,6 +176,7 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             className="input"
             autoComplete="new-password"
+            placeholder="Minimum 8 characters"
           />
 
           <span className="text-xs text-ink-muted">
@@ -144,15 +185,18 @@ export default function RegisterPage() {
         </Field>
 
         {error && (
-          <p className="text-sm text-red-600" role="alert">
+          <div
+            className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"
+            role="alert"
+          >
             {error}
-          </p>
+          </div>
         )}
 
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 rounded-full bg-ink text-paper font-medium py-2.5 hover:bg-ink/85 transition-colors disabled:opacity-50"
+          className="mt-2 rounded-full bg-ink text-paper font-medium py-2.5 hover:bg-ink/85 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Creating account…" : "Create account"}
         </button>
@@ -182,3 +226,4 @@ function Field({
     </label>
   );
 }
+```
