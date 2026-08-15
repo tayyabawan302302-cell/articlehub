@@ -57,11 +57,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <script
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4962220545836842"
-        crossOrigin="anonymous"
-      />
       <body>
         {accentColor && (
           <style dangerouslySetInnerHTML={{ __html: `:root { --color-accent: ${accentColor}; }` }} />
